@@ -290,7 +290,7 @@ export default function Builder() {
                           <div style={{ fontSize: 13, fontWeight: 700, color: sel ? '#00f5e0' : '#fff', marginBottom: 4 }}>{ind.name}</div>
                           <div style={{ fontSize: 10, color: C.muted2, lineHeight: 1.5, marginBottom: 6 }}>{ind.desc}</div>
                           <span style={{ fontSize: 8, fontFamily: "'JetBrains Mono', monospace", padding: '2px 6px', borderRadius: 2, background: ind.native ? 'rgba(0,200,180,0.1)' : 'rgba(184,255,87,0.1)', color: ind.native ? C.teal : C.volt, border: `1px solid ${ind.native ? 'rgba(0,200,180,0.2)' : 'rgba(184,255,87,0.2)'}` }}>
-                            {ind.custom ? '+ CRIAR' : ind.native ? 'NATIVO MT5' : 'CUSTOMIZADO'}
+                            {(ind as any).custom ? '+ CRIAR' : ind.native ? 'NATIVO MT5' : 'CUSTOMIZADO'}
                           </span>
                         </div>
                       )
