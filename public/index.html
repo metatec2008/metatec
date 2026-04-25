@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MetaTEC — O Futuro Chegou ao Seu Trade</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Barlow+Condensed:wght@300;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#020509;--deep:#030b14;--navy:#061424;--panel:#071828;--teal:#00c8b4;--teal2:#00f5e0;--volt:#b8ff57;--volt2:#d4ff8a;--red:#ff3b5c;--amber:#ffb830;--text:#cfe8f0;--muted:#3d6070;--muted2:#6a90a0;--border:rgba(0,200,180,0.12);--border2:rgba(0,200,180,0.25);--glow-t:0 0 40px rgba(0,200,180,0.4);--glow-v:0 0 40px rgba(184,255,87,0.35)}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--text);font-family:'Space Grotesk',sans-serif;overflow-x:hidden;cursor:none}
+/* garantir cursor sempre visível */
+#c-dot,#c-ring{pointer-events:none!important;will-change:left,top}
+
+
+/* hero e todas seções sempre visíveis */
+.hero .fi{opacity:1!important;transform:translateY(0)!important}
+.hero-right{opacity:1!important;transform:translateY(0)!important}
+.fi{opacity:1;transform:translateY(0)}
+
+#c-dot{
+  position:fixed;top:0;left:0;z-index:9999;
+  width:10px;height:10px;border-radius:50%;
+  background:#00f5e0;
+  pointer-events:none;
+  box-shadow:
+    0 0 6px #00f5e0,
+    0 0 14px #00c8b4,
+    0 0 28px rgba(0,200,180,0.6),
+    0 0 56px rgba(0,200,180,0.25);
+  transition:background 0.15s,box-shadow 0.15s,width 0.2s,height 0.2s;
+  transform:translate(-50%,-50%);
+  will-change:transform;
+}
+#c-dot.volt{
+  background:#b8ff57;
+  box-shadow:
+    0 0 6px #b8ff57,
+    0 0 14px #b8ff57,
+    0 0 28px rgba(184,255,87,0.6),
+    0 0 56px rgba(184,255,87,0.3);
+}
+#c-ring{
+  position:fixed;top:0;left:0;z-index:9998;
+  width:44px;height:44px;border-radius:50%;
+  border:1px solid rgba(0,200,180,0.45);
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  transition:width 0.25s,height 0.25s,border-color 0.25s,border-width 0.25s;
+  will-change:transform;
+}
+#c-ring.hover{width:68px;height:68px;border-color:#b8ff57;border-width:1.5px}
+/* rastros do laser */
+.c-trail{
+  position:fixed;pointer-events:none;z-index:9996;border-radius:50%;
+  transform:translate(-50%,-50%);
+  animation:trail-fade 0.6s ease-out forwards;
+}
+@keyframes trail-fade{
+  0%{opacity:.7;transform:translate(-50%,-50%) scale(1)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(0.05)}
+}
+/* efeito de clique — explosão radial */
+.c-burst{
+  position:fixed;pointer-events:none;z-index:9995;border-radius:50%;
+  border:2px solid var(--teal);
+  transform:translate(-50%,-50%) scale(0);
+  animation:burst 0.5s ease-out forwards;
+}
+@keyframes burst{
+  0%{opacity:.9;transform:translate(-50%,-50%) scale(0)}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(4)}
+}
+
+/* CANVAS */
+#cv{position:fixed;inset:0;z-index:0;pointer-events:none}
+/* MOUSE GLOW */
+#mg{position:fixed;z-index:1;pointer-events:none;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(0,200,180,0.07) 0%,rgba(0,200,180,0.02) 35%,transparent 70%);transform:translate(-50%,-50%)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:800;height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 5%;transition:all 0.4s}
+nav.scrolled{background:rgba(3,11,20,0.94);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;position:relative;z-index:1}
+.nav-logo-mark{width:34px;height:34px}
+.nav-logo-text{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:4px;color:#fff;text-transform:uppercase}
+.nav-logo-text em{color:var(--teal);font-style:normal}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none}
+.nav-links a{color:var(--muted2);font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:color 0.2s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--teal);transition:width 0.3s}
+.nav-links a:hover{color:var(--teal2)}.nav-links a:hover::after{width:100%}
+.nav-cta{background:transparent!important;border:1px solid var(--teal)!important;color:var(--teal)!important;padding:8px 20px!important;border-radius:3px!important;transition:all 0.25s!important}
+.nav-cta:hover{background:rgba(0,200,180,0.1)!important;box-shadow:var(--glow-t)!important}.nav-cta::after{display:none!important}
+@media(max-width:860px){.nav-links{display:none}}
+
+/* HERO */
+.hero{min-height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:100px 5% 60px;gap:40px;position:relative;overflow:hidden}
+@media(max-width:900px){.hero{grid-template-columns:1fr}}
+.hero-wp{position:absolute;inset:0;z-index:0;overflow:hidden}
+.hero-wp img{width:100%;height:100%;object-fit:cover;object-position:center right;filter:brightness(0.25) saturate(2.2) hue-rotate(15deg);transform:scale(1.08);transition:transform 15s ease}
+.hero-wp::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(2,5,9,0.98) 0%,rgba(2,5,9,0.72) 55%,rgba(2,5,9,0.25) 100%),linear-gradient(0deg,rgba(2,5,9,0.8) 0%,transparent 40%)}
+.hero-hex{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.04}
+.hero-scan{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.hero-scan::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--teal),var(--teal2),transparent);animation:scan-h 7s linear infinite;opacity:.45}
+.hero-scan::after{content:'';position:absolute;top:0;bottom:0;left:0;width:1px;background:linear-gradient(180deg,transparent,var(--teal2),transparent);animation:scan-v 11s linear infinite;opacity:.2}
+@keyframes scan-h{0%{top:-2px;opacity:0}8%{opacity:.45}92%{opacity:.45}100%{top:100%;opacity:0}}
+@keyframes scan-v{0%{left:-2px;opacity:0}8%{opacity:.2}92%{opacity:.2}100%{left:100%;opacity:0}}
+.hero>*{position:relative;z-index:2}
+.orb{position:absolute;border-radius:50%;pointer-events:none;z-index:1}
+.o1{width:700px;height:700px;top:-200px;right:-150px;background:radial-gradient(circle,rgba(0,200,180,0.09) 0%,transparent 65%);animation:op 10s ease-in-out infinite}
+.o2{width:500px;height:500px;bottom:-150px;left:-100px;background:radial-gradient(circle,rgba(184,255,87,0.06) 0%,transparent 65%);animation:op 14s ease-in-out infinite 3s}
+.o3{width:280px;height:280px;top:40%;right:26%;background:radial-gradient(circle,rgba(0,200,180,0.05) 0%,transparent 70%);animation:op 8s ease-in-out infinite 1s}
+@keyframes op{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.18);opacity:1}}
+
+.eyebrow{display:inline-flex;align-items:center;gap:10px;background:rgba(0,200,180,0.07);border:1px solid var(--border2);padding:7px 18px;border-radius:2px;margin-bottom:28px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--teal)}
+.e-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0;box-shadow:0 0 8px var(--teal);animation:edot 1.5s ease-in-out infinite}
+@keyframes edot{0%,100%{opacity:1;box-shadow:0 0 8px var(--teal)}50%{opacity:.3;box-shadow:0 0 2px var(--teal)}}
+.hero-h1{font-family:'Barlow Condensed',sans-serif;font-size:clamp(52px,8vw,106px);font-weight:900;line-height:.92;letter-spacing:-1px;color:#fff;margin-bottom:22px}
+.h1-t{color:var(--teal);display:block;text-shadow:0 0 40px rgba(0,200,180,0.5)}
+.h1-v{color:var(--volt);display:block;text-shadow:0 0 40px rgba(184,255,87,0.4)}
+.hero-sub{font-size:16px;line-height:1.8;color:var(--muted2);max-width:520px;margin-bottom:36px}
+.hero-sub strong{color:var(--text)}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:52px}
+.btn-main{display:inline-flex;align-items:center;gap:10px;background:var(--teal);color:#000;padding:15px 32px;border-radius:3px;font-weight:800;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;border:none;cursor:none;position:relative;overflow:hidden;transition:all 0.25s}
+.btn-main::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent);transform:translateX(-100%);transition:transform 0.5s}
+.btn-main:hover{background:var(--teal2);box-shadow:var(--glow-t)}.btn-main:hover::before{transform:translateX(100%)}
+.btn-ghost{display:inline-flex;align-items:center;gap:10px;border:1px solid var(--border2);color:var(--teal2);padding:15px 32px;border-radius:3px;font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none;cursor:none;transition:all 0.25s}
+.btn-ghost:hover{background:rgba(0,200,180,0.08);border-color:var(--teal);box-shadow:var(--glow-t)}
+.hero-stats{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--border);border-radius:4px;overflow:hidden;background:rgba(7,24,40,0.65);backdrop-filter:blur(12px)}
+.hst{padding:16px 10px;text-align:center;border-right:1px solid var(--border)}.hst:last-child{border-right:none}
+.hst-num{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;color:#fff;line-height:1;margin-bottom:3px}
+.hst-num .ac{color:var(--teal)}.hst-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px}
+.hero-right{display:flex;flex-direction:column;gap:12px}
+.h-img-frame{position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--border2);box-shadow:0 0 60px rgba(0,200,180,0.12)}
+.h-img-frame img{width:100%;height:380px;object-fit:cover;display:block;filter:brightness(0.72) saturate(1.5) hue-rotate(10deg)}
+.h-img-frame::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,rgba(2,5,9,0.85) 0%,transparent 50%)}
+.img-scan-line{position:absolute;left:0;right:0;height:2px;z-index:2;background:linear-gradient(90deg,transparent,var(--teal2),var(--teal),transparent);opacity:.7;animation:scan-h 3s linear infinite}
+.img-chips{position:absolute;top:14px;left:14px;z-index:3;display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:6px;background:rgba(2,5,9,0.82);border:1px solid var(--border2);padding:5px 12px;border-radius:2px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--text);backdrop-filter:blur(8px)}
+.cd{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.cdg{background:var(--volt);box-shadow:0 0 8px var(--volt);animation:edot 1.4s infinite}
+.cdt{background:var(--teal);box-shadow:0 0 8px var(--teal)}
+.img-metrics{position:absolute;bottom:0;left:0;right:0;z-index:3;padding:16px;display:flex;justify-content:space-between;align-items:flex-end}
+.im-val{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:900;color:var(--volt);line-height:1;text-shadow:0 0 18px rgba(184,255,87,0.5)}
+.im-lbl{font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px}
+.hcards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hcard{background:rgba(7,24,40,0.72);border:1px solid var(--border);border-radius:6px;padding:14px 16px;backdrop-filter:blur(10px);transition:all 0.3s;position:relative;overflow:hidden}
+.hcard::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--teal),transparent);opacity:0;transition:opacity 0.3s}
+.hcard:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--glow-t)}.hcard:hover::before{opacity:1}
+.hcard-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:5px;font-family:'JetBrains Mono',monospace}
+.hcard-val{font-family:'Barlow Condensed',monospace;font-size:20px;font-weight:800;color:#fff}
+.t{color:var(--teal)}.v{color:var(--volt)}.r{color:var(--red)}.g{color:var(--volt)}
+.hcard-sub{font-size:9px;color:var(--muted2);margin-top:2px}
+
+/* TICKER */
+.ticker{background:var(--navy);border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;height:36px;position:relative;z-index:2}
+.ticker-track{display:flex;align-items:center;height:100%;white-space:nowrap;animation:tick 28s linear infinite}
+.ti{display:inline-flex;align-items:center;gap:8px;padding:0 32px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);border-right:1px solid var(--border)}
+.ti-n{color:var(--text);font-weight:600}.ti-u{color:var(--volt)}.ti-d{color:var(--red)}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* MANIFESTO */
+.manifesto{position:relative;overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.m-bg{position:absolute;inset:0;z-index:0}
+.m-bg img{width:100%;height:100%;object-fit:cover;filter:brightness(0.08) saturate(2)}
+.m-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(3,11,20,0.97) 0%,rgba(3,11,20,0.6) 55%,transparent 100%)}
+.m-inner{position:relative;z-index:1;display:flex;min-height:280px;align-items:stretch}
+.m-copy{flex:1;padding:70px 5%;display:flex;flex-direction:column;justify-content:center}
+.m-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--teal);margin-bottom:14px}
+.m-h{font-family:'Barlow Condensed',sans-serif;font-size:clamp(36px,5vw,62px);font-weight:900;color:#fff;line-height:1.02;letter-spacing:-0.5px}
+.m-h em{color:var(--volt);font-style:normal;text-shadow:0 0 30px rgba(184,255,87,0.4)}
+.m-img-col{width:44%;flex-shrink:0;position:relative;overflow:hidden}
+.m-img-col img{width:100%;height:100%;object-fit:cover;filter:brightness(0.5) saturate(1.5)}
+.m-img-col::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(3,11,20,0.95) 0%,transparent 35%)}
+@media(max-width:768px){.m-img-col{display:none}}
+
+/* SEÇÃO GENÉRICA */
+section{padding:110px 5%;position:relative;z-index:1}
+.s-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:12px}
+.s-h{font-family:'Barlow Condensed',sans-serif;font-size:clamp(38px,5vw,68px);font-weight:900;color:#fff;letter-spacing:-0.5px;line-height:1.02;margin-bottom:16px}
+.hl-t{color:var(--teal);text-shadow:0 0 30px rgba(0,200,180,0.4)}.hl-v{color:var(--volt);text-shadow:0 0 30px rgba(184,255,87,0.35)}
+.s-sub{font-size:15px;color:var(--muted2);max-width:540px;line-height:1.8;margin-bottom:56px}
+
+/* WALLPAPER SECTION */
+.ws{position:relative;overflow:hidden}
+.ws-bg{position:absolute;inset:0;z-index:0}
+.ws-bg img{width:100%;height:100%;object-fit:cover;filter:brightness(0.09) saturate(2.2) hue-rotate(10deg)}
+.ws-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(2,5,9,0.97) 0%,rgba(2,5,9,0.85) 50%,rgba(2,5,9,0.75) 100%)}
+.ws-hex{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.045;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='52'%3E%3Cpolygon points='30,1 59,15 59,44 30,58 1,44 1,15' fill='none' stroke='%2300c8b4' stroke-width='0.5'/%3E%3C/svg%3E");background-size:60px 52px}
+.ws-dots{position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0.055;background-image:radial-gradient(circle,rgba(0,200,180,1) 1px,transparent 1px);background-size:28px 28px}
+.ws-scan{position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden}
+.ws-scan::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--teal2),transparent);animation:scan-h 9s linear infinite;opacity:.25}
+.ws>.padd,.ws>section{position:relative;z-index:2}
+.ws>*:not(.ws-bg):not(.ws-hex):not(.ws-dots):not(.ws-scan){position:relative;z-index:2}
+
+/* COMO FUNCIONA */
+.como-section{background:var(--deep)}
+.process-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+@media(max-width:900px){.process-grid{grid-template-columns:1fr 1fr}}
+.pstep{padding:36px 16px 28px;text-align:center;background:var(--panel);border:1px solid transparent;position:relative;overflow:hidden;transition:all 0.35s;cursor:none}
+.pstep::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,200,180,0.05),transparent);opacity:0;transition:opacity 0.35s}
+.pstep:hover{border-color:var(--border2);transform:translateY(-5px);box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 0 1px var(--border2),var(--glow-t)}.pstep:hover::before{opacity:1}
+.pstep-num{width:44px;height:44px;border-radius:50%;background:var(--panel);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--teal);font-weight:700;transition:all 0.3s}
+.pstep:hover .pstep-num{background:var(--teal);color:#000;box-shadow:0 0 24px rgba(0,200,180,0.6)}
+.pstep-icon{font-size:28px;display:block;margin-bottom:12px;filter:drop-shadow(0 0 8px rgba(0,200,180,0.3))}
+.pstep-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:8px}.pstep-desc{font-size:11px;color:var(--muted2);line-height:1.6}
+
+/* IMG FULLWIDTH */
+.img-fw{position:relative;overflow:hidden;min-height:380px}
+.img-fw img{width:100%;height:380px;object-fit:cover;display:block;filter:brightness(0.45) saturate(1.6)}
+.img-fw-ov{position:absolute;inset:0;z-index:2;background:linear-gradient(90deg,rgba(2,5,9,0.92) 0%,rgba(2,5,9,0.5) 55%,transparent 100%);display:flex;align-items:center;padding:0 5%}
+
+/* SEGURANÇA */
+.seg-layout{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+@media(max-width:860px){.seg-layout{grid-template-columns:1fr}}
+.seg-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.seg-card{background:rgba(7,24,40,0.7);border:1px solid var(--border);border-radius:6px;padding:20px;position:relative;overflow:hidden;transition:all 0.3s;cursor:none;backdrop-filter:blur(4px)}
+.seg-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--teal),var(--volt));transform:scaleX(0);transform-origin:left;transition:transform 0.35s}
+.seg-card:hover{border-color:var(--border2);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.4),var(--glow-t)}.seg-card:hover::after{transform:scaleX(1)}
+.seg-icon{font-size:22px;margin-bottom:10px;display:block;filter:drop-shadow(0 0 6px rgba(0,200,180,0.4))}
+.seg-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:6px}.seg-desc{font-size:11px;color:var(--muted2);line-height:1.6;margin-bottom:8px}
+.seg-code{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--teal);background:rgba(0,200,180,0.06);border:1px solid rgba(0,200,180,0.12);padding:3px 7px;border-radius:2px;display:inline-block}
+.seg-badge{position:absolute;top:10px;right:10px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;background:rgba(184,255,87,0.08);border:1px solid rgba(184,255,87,0.2);color:var(--volt);padding:2px 7px;border-radius:2px}
+
+/* PAINEL DO ROBÔ */
+.painel-layout{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+@media(max-width:860px){.painel-layout{grid-template-columns:1fr}}
+.pf-item{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.pf-ico{width:34px;height:34px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:box-shadow 0.3s}
+.pf-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:3px}.pf-desc{font-size:12px;color:var(--muted2)}
+.pm-mock{background:rgba(7,24,40,0.85);border:1px solid var(--border2);border-radius:12px;overflow:hidden;box-shadow:0 0 80px rgba(0,200,180,0.1),inset 0 0 40px rgba(0,0,0,0.3);transition:box-shadow 0.4s;backdrop-filter:blur(8px)}
+.pm-mock:hover{box-shadow:0 0 100px rgba(0,200,180,0.2),inset 0 0 40px rgba(0,0,0,0.3)}
+.pm-top{background:rgba(0,200,180,0.05);border-bottom:1px solid var(--border);padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.pm-dots{display:flex;gap:6px}.pm-dot{width:9px;height:9px;border-radius:50%}
+.pm-title{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:2px}
+.pm-live{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--teal)}
+.pm-body{padding:18px}
+.pm-status{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:12px 14px;background:rgba(0,200,180,0.04);border:1px solid var(--border);border-radius:6px}
+.pm-slbl{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px}
+.on{color:var(--volt);text-shadow:0 0 12px rgba(184,255,87,0.5)}.off{color:var(--red)}
+.tgl-wrap{display:flex;align-items:center;gap:10px}
+.tgl-txt{font-size:10px;color:var(--muted2);font-family:'JetBrains Mono',monospace}
+.tgl{position:relative;width:52px;height:26px;cursor:none}.tgl input{opacity:0;width:0;height:0}
+.tgl-s{position:absolute;inset:0;background:rgba(255,59,92,0.25);border:1px solid var(--red);border-radius:13px;transition:all 0.35s;cursor:pointer}
+.tgl-s::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:var(--red);border-radius:50%;transition:all 0.35s;box-shadow:0 0 10px rgba(255,59,92,0.7)}
+.tgl input:checked+.tgl-s{background:rgba(184,255,87,0.12);border-color:var(--volt)}
+.tgl input:checked+.tgl-s::before{transform:translateX(26px);background:var(--volt);box-shadow:0 0 14px rgba(184,255,87,0.8)}
+.pm-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.pmm{background:var(--navy);border:1px solid var(--border);border-radius:5px;padding:10px 8px;text-align:center;transition:border-color 0.3s}.pmm:hover{border-color:var(--border2)}
+.pmm-val{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;line-height:1;margin-bottom:3px}
+.pmm-lbl{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-family:'JetBrains Mono',monospace}
+.mini-chart{display:flex;align-items:flex-end;gap:2px;height:42px;padding:6px 12px;background:var(--navy);border:1px solid var(--border);border-radius:5px;margin-bottom:10px}
+.mc-b{flex:1;border-radius:1px;min-height:4px}
+.mc-up{background:linear-gradient(0deg,var(--volt),rgba(184,255,87,0.5))}
+.mc-dn{background:linear-gradient(0deg,var(--red),rgba(255,59,92,0.5))}
+.btn-stop{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:rgba(255,59,92,0.08);border:1px solid rgba(255,59,92,0.4);color:var(--red);padding:10px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:none;font-family:'Space Grotesk',sans-serif;margin-bottom:10px;transition:all 0.25s}
+.btn-stop:hover{background:rgba(255,59,92,0.18);box-shadow:0 0 30px rgba(255,59,92,0.25)}
+.stop-sq{width:9px;height:9px;background:var(--red);border-radius:2px;flex-shrink:0;animation:edot 1.2s infinite}
+.pm-log{background:var(--ink);border:1px solid var(--border);border-radius:5px;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted2);height:66px;overflow:hidden}
+.ll{line-height:1.9}.lok{color:var(--volt)}.lwarn{color:var(--amber)}.linfo{color:var(--teal)}
+
+/* 9 AGENTES */
+.ag-layout{display:grid;grid-template-columns:auto 1fr;gap:0;min-height:520px}
+@media(max-width:900px){.ag-layout{grid-template-columns:1fr}}
+.ag-sb{width:298px;border-right:1px solid var(--border);padding:0 42px 0 0;display:flex;flex-direction:column;justify-content:center}
+@media(max-width:900px){.ag-sb{width:100%;border-right:none;border-bottom:1px solid var(--border);padding:0 0 36px}}
+.ag-grid{padding:0 0 0 42px;display:flex;flex-direction:column;justify-content:center;gap:7px}
+@media(max-width:900px){.ag-grid{padding:36px 0 0}}
+.ag-row{display:flex;align-items:center;gap:12px;padding:11px 16px;background:rgba(7,24,40,0.8);border:1px solid var(--border);border-radius:4px;transition:all 0.3s;cursor:none;position:relative;overflow:hidden;backdrop-filter:blur(4px)}
+.ag-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--teal),var(--volt));transform:scaleY(0);transform-origin:bottom;transition:transform 0.35s}
+.ag-row:hover{border-color:var(--border2);background:rgba(0,200,180,0.04);transform:translateX(4px)}.ag-row:hover::before{transform:scaleY(1)}
+.ag-ico{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;border:1px solid;transition:box-shadow 0.3s}
+.ag-row:hover .ag-ico{box-shadow:0 0 16px rgba(0,200,180,0.5)}
+.ag-name{font-size:12px;font-weight:700;color:#fff}.ag-desc{font-size:10px;color:var(--muted2)}
+.ag-obs{font-size:9px;margin-top:2px;font-family:'JetBrains Mono',monospace;color:var(--amber)}
+.ag-score{margin-left:auto;font-family:'Barlow Condensed',monospace;font-size:20px;font-weight:900;flex-shrink:0}
+.ag-bar{position:absolute;bottom:0;left:0;height:2px;transition:width 1.2s ease}
+.nota-media{display:flex;align-items:center;justify-content:space-between;background:rgba(184,255,87,0.05);border:1px solid rgba(184,255,87,0.2);border-radius:4px;padding:14px 18px;margin-top:8px}
+.nm-lbl{font-size:10px;color:var(--muted2);font-family:'JetBrains Mono',monospace}
+.nm-val{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:900;color:var(--volt);text-shadow:0 0 20px rgba(184,255,87,0.5)}
+
+/* PLACAR */
+.placar-wrap{background:rgba(2,5,9,0.9);border:1px solid var(--border2);border-radius:10px;overflow:hidden;backdrop-filter:blur(14px)}
+.placar-table{width:100%;border-collapse:collapse}
+.placar-table th{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
+.placar-table td{padding:9px 14px;font-size:12px;border-bottom:1px solid rgba(255,255,255,0.04);vertical-align:middle}
+.placar-table tr:last-child td{border-bottom:none}.placar-table tr:hover td{background:rgba(0,200,180,0.03)}
+.pt-n{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px}.pt-nome{font-weight:700;color:#fff}
+.pt-ok{font-family:'JetBrains Mono',monospace;font-weight:900;color:var(--volt)}
+.pt-warn{font-family:'JetBrains Mono',monospace;font-weight:900;color:var(--amber)}
+.placar-foot{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid var(--border2);background:rgba(0,200,180,0.04)}
+
+/* PLANOS */
+.planos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:1000px){.planos-grid{grid-template-columns:1fr 1fr}}
+.plano{background:rgba(7,24,40,0.75);border:1px solid var(--border);border-radius:6px;padding:28px 20px;position:relative;overflow:hidden;transition:all 0.35s;cursor:none;backdrop-filter:blur(4px)}
+.plano::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,200,180,0.06),transparent);opacity:0;transition:opacity 0.4s}
+.plano:hover{border-color:var(--border2);transform:translateY(-6px);box-shadow:0 24px 60px rgba(0,0,0,0.5),var(--glow-t)}.plano:hover::before{opacity:1}
+.plano.featured{border-color:var(--teal);background:linear-gradient(160deg,rgba(7,24,40,0.85),rgba(0,200,180,0.06))}
+.plano-tag{position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--teal);color:#000;font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 14px;border-radius:0 0 4px 4px}
+.plano-name{font-size:10px;color:var(--muted2);text-transform:uppercase;letter-spacing:2px;font-family:'JetBrains Mono',monospace;margin-bottom:14px;margin-top:10px}
+.plano-price{font-family:'Barlow Condensed',sans-serif;font-size:50px;font-weight:900;color:#fff;line-height:1;margin-bottom:4px}
+.plano-price sup{font-size:18px;vertical-align:top;margin-top:12px;display:inline-block;font-weight:700}
+.plano-base{font-size:10px;color:var(--muted);margin-bottom:20px}
+.plano-div{height:1px;background:var(--border);margin-bottom:16px}
+.plano-feats{display:flex;flex-direction:column;gap:8px;margin-bottom:22px}
+.plano-feat{display:flex;align-items:flex-start;gap:8px;font-size:11px;color:var(--muted2);line-height:1.4}
+.plano-feat::before{content:'→';color:var(--teal);font-size:10px;flex-shrink:0;margin-top:1px}
+.btn-plano{display:block;text-align:center;padding:11px;border-radius:3px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:1px solid var(--border2);color:var(--teal2);background:transparent;cursor:none;width:100%;font-family:'Space Grotesk',sans-serif;transition:all 0.25s}
+.btn-plano:hover{background:rgba(0,200,180,0.1)}
+.plano.featured .btn-plano{background:var(--teal);color:#000;border-color:var(--teal)}
+.plano.featured .btn-plano:hover{background:var(--teal2)}
+
+/* DEPOIMENTOS */
+.dep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.dep-card{background:rgba(7,24,40,0.75);border:1px solid var(--border);border-radius:6px;padding:26px;position:relative;overflow:hidden;transition:all 0.3s;cursor:none;backdrop-filter:blur(4px)}
+.dep-card::before{content:'"';position:absolute;top:8px;right:16px;font-family:'Barlow Condensed',sans-serif;font-size:80px;font-weight:900;color:rgba(0,200,180,0.07);line-height:1;pointer-events:none}
+.dep-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 16px 50px rgba(0,0,0,0.4),var(--glow-t)}
+.dep-stars{color:var(--volt);font-size:13px;letter-spacing:3px;margin-bottom:14px;text-shadow:0 0 8px rgba(184,255,87,0.5)}
+.dep-text{font-size:13px;color:var(--muted2);line-height:1.75;margin-bottom:18px}
+.dep-author{display:flex;align-items:center;gap:12px;border-top:1px solid var(--border);padding-top:14px}
+.dep-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--volt));display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800;color:#000;flex-shrink:0}
+.dep-name{font-size:13px;font-weight:700;color:#fff}.dep-role{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+
+/* FAQ */
+.faq-col{max-width:760px;display:flex;flex-direction:column;gap:6px}
+.faq-item{border:1px solid var(--border);border-radius:4px;overflow:hidden;transition:border-color 0.2s,box-shadow 0.2s}
+.faq-item.open{border-color:rgba(0,200,180,0.3);box-shadow:0 0 20px rgba(0,200,180,0.08)}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;cursor:none;gap:16px;font-size:14px;font-weight:600;color:#fff;transition:color 0.2s}
+.faq-q:hover{color:var(--teal)}
+.faq-toggle{width:22px;height:22px;border-radius:3px;background:var(--panel);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted2);flex-shrink:0;transition:all 0.25s}
+.faq-item.open .faq-toggle{background:var(--teal);color:#000;transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;padding:0 22px;font-size:13px;color:var(--muted2);line-height:1.7;transition:max-height 0.35s,padding 0.3s}
+.faq-item.open .faq-a{max-height:300px;padding:0 22px 18px}
+
+/* CTA FINAL */
+.cta-section{position:relative;overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);text-align:center;padding:120px 5%}
+.cta-bg{position:absolute;inset:0;z-index:0}
+.cta-bg img{width:100%;height:100%;object-fit:cover;filter:brightness(0.06) saturate(2)}
+.cta-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 70% at 50% 50%,rgba(0,200,180,0.1),transparent)}
+.cta-section>*:not(.cta-bg){position:relative;z-index:1}
+.cta-p{color:var(--muted2);font-size:16px;max-width:500px;margin:0 auto 40px;line-height:1.8}
+.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+
+/* FOOTER */
+footer{background:var(--deep);border-top:1px solid var(--border);padding:52px 5% 28px}
+.footer-grid{display:flex;justify-content:space-between;flex-wrap:wrap;gap:32px;margin-bottom:44px}
+.footer-logo-txt{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;letter-spacing:4px;color:#fff}
+.footer-logo-txt em{color:var(--teal);font-style:normal}
+.footer-tagline{font-size:12px;color:var(--muted);margin-top:6px;max-width:240px;line-height:1.6}
+.fc-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:14px;font-family:'JetBrains Mono',monospace}
+.footer-links{display:flex;flex-direction:column;gap:8px}
+.footer-links a{font-size:13px;color:var(--muted2);text-decoration:none;transition:color 0.2s}.footer-links a:hover{color:var(--teal)}
+.footer-bottom{border-top:1px solid var(--border);padding-top:22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.footer-copy{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.fb-badge{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2)}
+.fb-dot{width:6px;height:6px;border-radius:50%;background:var(--volt);animation:edot 1.4s infinite}
+.wa{position:fixed;bottom:28px;right:28px;z-index:700;width:54px;height:54px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center;font-size:26px;text-decoration:none;box-shadow:0 4px 24px rgba(37,211,102,0.45);transition:transform 0.2s,box-shadow 0.2s;animation:wa-in 0.5s 1.5s ease both}
+.wa:hover{transform:scale(1.12);box-shadow:0 8px 40px rgba(37,211,102,0.6)}
+@keyframes wa-in{from{transform:scale(0)}to{transform:scale(1)}}
+.fi{opacity:0;transform:translateY(26px);transition:opacity 0.7s ease,transform 0.7s ease}
+.fi.vis{opacity:1;transform:translateY(0)}
+/* hero sempre visível — não depende de scroll */
+.hero .fi{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+<div id="mg"></div>
+<div id="c-dot"></div>
+<div id="c-ring"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a class="nav-logo" href="#">
+    <img src="img_robo_logo.png" alt="MetaTEC" style="width:38px;height:38px;object-fit:cover;border-radius:50%;border:1px solid rgba(0,200,180,0.4);box-shadow:0 0 12px rgba(0,200,180,0.3)">
+    <span class="nav-logo-text">Meta<em>TEC</em></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#como-funciona">Processo</a></li>
+    <li><a href="#seguranca">Segurança</a></li>
+    <li><a href="#painel">Painel</a></li>
+    <li><a href="#agentes">9 Agentes</a></li>
+    <li><a href="#planos">Planos</a></li>
+    <li><a href="#depoimentos">Clientes</a></li>
+    <li><a href="#orcamento" class="nav-cta">Orçamento</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-wp"><img src="img_dashboard.png" id="hero-wp-img" alt=""></div>
+  <div class="hero-hex"><svg width="100%" height="100%"><defs><pattern id="hx" x="0" y="0" width="60" height="52" patternUnits="userSpaceOnUse"><polygon points="30,1 59,15 59,44 30,58 1,44 1,15" fill="none" stroke="rgba(0,200,180,1)" stroke-width="0.5"/></pattern></defs><rect width="100%" height="100%" fill="url(#hx)"/></svg></div>
+  <div class="hero-scan"></div>
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+
+  <div class="fi fd1">
+    <div class="eyebrow"><span class="e-dot"></span>MetaTEC — Expert Advisors MQL5 — Entregues e Verificados</div>
+    <h1 class="hero-h1"><span>O FUTURO</span><span class="h1-t">CHEGOU</span><span class="h1-v">AO SEU TRADE</span></h1>
+    <p class="hero-sub">Somos a <strong>inovação</strong>. Somos a <strong>segurança</strong>. Somos a realidade ao seu alcance.<br>Programamos, verificamos com <strong>9 agentes especializados</strong> e entregamos seu robô MT5 licenciado.</p>
+    <div class="hero-btns">
+      <a href="builder.html" class="btn-main" onclick=""><svg width="11" height="11" viewBox="0 0 11 11"><polygon points="1,1 10,5.5 1,10" fill="currentColor"/></svg>Quero meu Robô</a>
+      <a href="#agentes" class="btn-ghost">Ver 9 agentes →</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hst"><div class="hst-num">200<span class="ac">+</span></div><div class="hst-lbl">Robôs entregues</div></div>
+      <div class="hst"><div class="hst-num"><span class="ac">9</span></div><div class="hst-lbl">Agentes verificação</div></div>
+      <div class="hst"><div class="hst-num">9<span class="ac">.56</span></div><div class="hst-lbl">Nota média placar</div></div>
+      <div class="hst"><div class="hst-num"><span class="ac">0</span></div><div class="hst-lbl">Erros compilação</div></div>
+    </div>
+  </div>
+
+  <div class="hero-right fi fd2">
+    <div class="h-img-frame">
+      <div class="img-scan-line"></div>
+      <img src="img_dashboard.png" alt="Plataforma MetaTEC">
+      <div class="img-chips">
+        <div class="chip"><span class="cd cdg"></span>SISTEMA ATIVO</div>
+        <div class="chip"><span class="cd cdt"></span>27/27 CHECKS</div>
+      </div>
+      <div class="img-metrics">
+        <div><div class="im-val">+R$ 4.280</div><div class="im-lbl">P&L Dia · WIN$</div></div>
+        <div style="text-align:right"><div class="im-val" style="color:var(--teal)">9.56</div><div class="im-lbl">Nota verificação</div></div>
+      </div>
+    </div>
+    <div class="hcards">
+      <div class="hcard"><div class="hcard-lbl">Anti Delay</div><div class="hcard-val"><span class="t">iTime()</span></div><div class="hcard-sub">Padrão BR</div></div>
+      <div class="hcard"><div class="hcard-lbl">Anti Duplicação</div><div class="hcard-val"><span class="t">HasPos()</span></div><div class="hcard-sub">+timeout 5s</div></div>
+      <div class="hcard"><div class="hcard-lbl">Licença</div><div class="hcard-val"><span class="v">CPF</span></div><div class="hcard-sub">Vinculada</div></div>
+      <div class="hcard"><div class="hcard-lbl">Compilação</div><div class="hcard-val" style="font-size:17px"><span class="v">0 erros</span></div><div class="hcard-sub">Garantido</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker"><div class="ticker-track" id="tt"></div></div>
+
+<!-- MANIFESTO -->
+<div class="manifesto">
+  <div class="m-bg"><img src="img_placar.jpg" alt=""></div>
+  <div class="m-inner">
+    <div class="m-copy fi"><div class="m-tag">// MetaTEC — Manifesto</div><h2 class="m-h">NÃO É FICÇÃO<br>CIENTÍFICA.<br><em>É AGORA.</em></h2><p style="margin-top:18px;font-size:14px;color:var(--muted2);max-width:440px;line-height:1.8">O futuro não está no horizonte — <strong style="color:var(--text)">ele já chegou, e tem o seu CPF gravado nele.</strong></p></div>
+    <div class="m-img-col"><img src="img_dashboard.png" alt=""></div>
+  </div>
+</div>
+
+<!-- COMO FUNCIONA -->
+<section class="como-section fi" id="como-funciona">
+  <span class="s-tag">// Processo</span>
+  <h2 class="s-h">COMO A <span class="hl-t">MetaTEC</span> TRABALHA</h2>
+  <p class="s-sub">Do briefing ao robô no MetaEditor. Cinco etapas. Zero margem para erro.</p>
+  <div class="process-grid">
+    <div class="pstep fi fd1"><div class="pstep-num">01</div><span class="pstep-icon">🧩</span><div class="pstep-title">Monte sua Estratégia</div><div class="pstep-desc">Indicadores, tipo de ordem, gestão de risco e lógica operacional no Builder online.</div></div>
+    <div class="pstep fi fd2"><div class="pstep-num">02</div><span class="pstep-icon">💳</span><div class="pstep-title">Confirme o Pagamento</div><div class="pstep-desc">PIX, boleto ou cartão em até 12x. Preço calculado em tempo real.</div></div>
+    <div class="pstep fi fd3"><div class="pstep-num">03</div><span class="pstep-icon">💻</span><div class="pstep-title">Programamos seu Robô</div><div class="pstep-desc">Expert Advisor gerado com todas as proteções padrão MetaTEC embutidas.</div></div>
+    <div class="pstep fi fd1"><div class="pstep-num">04</div><span class="pstep-icon">🛡️</span><div class="pstep-title">9 Agentes Verificam</div><div class="pstep-desc">Placar Final com 9 verificações especializadas. Nota mínima 9.0 por agente.</div></div>
+    <div class="pstep fi fd2"><div class="pstep-num">05</div><span class="pstep-icon">📨</span><div class="pstep-title">Enviamos por E-mail</div><div class="pstep-desc">O .mq5 aprovado chega com seu CPF na licença. Compile e opere.</div></div>
+  </div>
+</section>
+
+<!-- FULLWIDTH celular -->
+<div class="img-fw fi">
+  <img src="img_celular.jpg" alt="">
+  <div class="img-fw-ov"><div><span class="s-tag">// Mobilidade total</span><h2 class="s-h" style="font-size:clamp(28px,4vw,52px);margin-bottom:10px">SEU ROBÔ NA<br><span class="hl-v">PALMA DA MÃO</span></h2><p style="font-size:13px;color:var(--muted2);line-height:1.75;max-width:360px">Monitore posições e resultados em tempo real pelo celular.</p></div></div>
+</div>
+
+<!-- SEGURANÇA — WALLPAPER -->
+<div class="ws fi" id="seguranca" style="padding:110px 5%">
+  <div class="ws-bg"><img src="img_mobile.jpg" alt=""></div>
+  <div class="ws-hex"></div><div class="ws-dots"></div><div class="ws-scan"></div>
+  <span class="s-tag">// Proteção nível enterprise</span>
+  <h2 class="s-h">SEGURANÇA QUE<br><span class="hl-t">NÃO</span> NEGOCIA</h2>
+  <p class="s-sub">Seis camadas de proteção embutidas no código — não como opção, como padrão obrigatório.</p>
+  <div class="seg-layout">
+    <div><div style="padding:20px;background:rgba(0,200,180,0.05);border:1px solid var(--border2);border-radius:4px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--teal);letter-spacing:1px;margin-bottom:10px">// 27 VERIFICAÇÕES TÉCNICAS ANTES DA ENTREGA</div><div style="font-size:13px;color:var(--muted2);line-height:1.75">Todo robô passa pelo verificador automático — 27 checks linha a linha antes de ser enviado.</div></div></div>
+    <div class="seg-cards">
+      <div class="seg-card"><span class="seg-badge">ATIVO</span><span class="seg-icon">⚡</span><div class="seg-title">Anti Delay — iTime()</div><div class="seg-desc">Executa apenas na abertura de novo candle. Padrão profissional BR.</div><span class="seg-code">g_lastBar = iTime()</span></div>
+      <div class="seg-card"><span class="seg-badge">ATIVO</span><span class="seg-icon">🔒</span><div class="seg-title">Anti Duplicação</div><div class="seg-desc">HasPosition() + g_orderPending com timeout 5s.</div><span class="seg-code">TimeCurrent()-g_orderAt&lt;5</span></div>
+      <div class="seg-card"><span class="seg-badge">ATIVO</span><span class="seg-icon">🧠</span><div class="seg-title">Magic Number</div><div class="seg-desc">Gerado por pedido. Sem conflito entre EAs.</div><span class="seg-code">SetExpertMagicNumber()</span></div>
+      <div class="seg-card"><span class="seg-badge">ATIVO</span><span class="seg-icon">📡</span><div class="seg-title">Verificação Conexão</div><div class="seg-desc">Suspende se terminal offline.</div><span class="seg-code">TERMINAL_CONNECTED</span></div>
+      <div class="seg-card"><span class="seg-badge">ATIVO</span><span class="seg-icon">💹</span><div class="seg-title">Filtro de Spread</div><div class="seg-desc">Bloqueia entradas em picos de spread.</div><span class="seg-code">if(spread&gt;InpMaxSpread)</span></div>
+      <div class="seg-card"><span class="seg-badge">ATIVO</span><span class="seg-icon">🔐</span><div class="seg-title">Licença CPF / MT5</div><div class="seg-desc">Bloqueio imediato no OnInit().</div><span class="seg-code">if(!Licenca()) INIT_FAILED</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- FULLWIDTH dashboard -->
+<div class="img-fw fi">
+  <img src="img_dashboard.png" alt="" style="filter:brightness(0.38) saturate(1.7)">
+  <div class="img-fw-ov"><div><span class="s-tag">// Dashboard técnico</span><h2 class="s-h" style="font-size:clamp(26px,3.5vw,48px);margin-bottom:10px">CADA DETALHE<br><span class="hl-t">SOB CONTROLE</span></h2><p style="font-size:13px;color:var(--muted2);line-height:1.75;max-width:360px">RSI, MACD, Bollinger, ADX, VWAP — precisão cirúrgica em cada linha de código.</p></div></div>
+</div>
+
+<!-- PAINEL DO ROBÔ — WALLPAPER -->
+<div class="ws fi" id="painel" style="padding:110px 5%">
+  <div class="ws-bg"><img src="img_app.jpg" alt=""></div>
+  <div class="ws-hex"></div><div class="ws-dots"></div><div class="ws-scan"></div>
+  <div class="painel-layout">
+    <div>
+      <span class="s-tag">// Controle total na sua mão</span>
+      <h2 class="s-h">PAINEL DO<br><span class="hl-t">ROBÔ</span> —<br><span class="hl-v">LIGA. DESLIGA. ZERA.</span></h2>
+      <p style="font-size:14px;color:var(--muted2);line-height:1.8;margin-top:14px;margin-bottom:26px">Todo robô MetaTEC é entregue com painel de controle integrado. Um <strong style="color:var(--text)">botão de emergência</strong> fecha todas as posições instantaneamente.</p>
+      <div class="pf-item"><div class="pf-ico" style="background:rgba(184,255,87,0.1);border:1px solid rgba(184,255,87,0.2)">🟢</div><div><div class="pf-title">Botão Liga / Desliga</div><div class="pf-desc">Suspende o robô sem remover do gráfico. Estado salvo em variável global.</div></div></div>
+      <div class="pf-item"><div class="pf-ico" style="background:rgba(255,59,92,0.1);border:1px solid rgba(255,59,92,0.2)">🛑</div><div><div class="pf-title">Zerar Manualmente</div><div class="pf-desc">Fecha todas as posições do Magic Number com um clique. Para emergências.</div></div></div>
+      <div class="pf-item"><div class="pf-ico" style="background:rgba(0,200,180,0.1);border:1px solid rgba(0,200,180,0.2)">📊</div><div><div class="pf-title">Métricas em Tempo Real</div><div class="pf-desc">P&L, posições abertas, spread atual e status de conexão no gráfico.</div></div></div>
+    </div>
+    <div class="pm-mock fi fd2">
+      <div class="pm-top">
+        <div class="pm-dots"><div class="pm-dot" style="background:#ff3b5c"></div><div class="pm-dot" style="background:#ffb830"></div><div class="pm-dot" style="background:var(--volt);box-shadow:0 0 8px var(--volt)"></div></div>
+        <div class="pm-title">MetaTEC — EA CONTROL PANEL v2.1</div>
+        <div class="pm-live">● LIVE</div>
+      </div>
+      <div class="pm-body">
+        <div class="pm-status">
+          <div><div class="pm-slbl on" id="slbl">● ROBÔ ATIVO</div><div style="font-size:9px;color:var(--muted2);margin-top:2px;font-family:'JetBrains Mono',monospace">WIN$ M5 · RSI+MACD · Magic #47291</div></div>
+          <div class="tgl-wrap"><span class="tgl-txt" id="tgltxt">ON</span><label class="tgl"><input type="checkbox" id="robo-toggle" checked onchange="toggleRobo(this)"><span class="tgl-s"></span></label></div>
+        </div>
+        <div class="pm-metrics">
+          <div class="pmm"><div class="pmm-val g" id="pnlval">+R$1.840</div><div class="pmm-lbl">P&L Dia</div></div>
+          <div class="pmm"><div class="pmm-val t" id="opsval">2</div><div class="pmm-lbl">Posições</div></div>
+          <div class="pmm"><div class="pmm-val t" id="sprdval">1.2</div><div class="pmm-lbl">Spread</div></div>
+        </div>
+        <div class="mini-chart" id="mchart"></div>
+        <button class="btn-stop" id="btn-zerar" onclick="zerarPosicoes()"><div class="stop-sq"></div>ZERAR POSIÇÕES AGORA</button>
+        <div class="pm-log" id="plog"><div class="ll linfo">// MetaTEC EA Control Panel v2.1</div><div class="ll lok">[09:31:02] BUY 1lot WIN$ @134.280 SL:230 TP:380</div><div class="ll lok">[09:33:18] Trailing → SL 134.260</div><div class="ll linfo">[09:35:44] Aguardando sinal — spread 1.2pts ✓</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 9 AGENTES — WALLPAPER -->
+<div class="ws fi" id="agentes" style="padding:110px 5%">
+  <div class="ws-bg"><img src="img_dashboard.png" alt=""></div>
+  <div class="ws-hex"></div><div class="ws-dots"></div><div class="ws-scan"></div>
+  <div class="ag-layout">
+    <div class="ag-sb">
+      <span class="s-tag">// Placar Final</span>
+      <h2 class="s-h" style="font-size:clamp(32px,3.5vw,52px)">9 AGENTES<br><span class="hl-v">VERIFICAM</span><br>SEU CÓDIGO</h2>
+      <p style="font-size:13px;color:var(--muted2);line-height:1.75;margin-top:14px;margin-bottom:20px">Nenhum robô é entregue sem o <strong style="color:var(--text)">Placar Final</strong>. Nove verificações — do Anti-Delay ao Fluxo de Execução. Nota mínima: <strong style="color:var(--text)">9.0</strong> por agente.</p>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2);padding:14px;background:rgba(7,24,40,0.85);border:1px solid var(--border);border-radius:4px"><span style="color:var(--teal)">if</span>(notaMedia &lt; 9.7) {<br>&nbsp;&nbsp;reprocessar();<br>} <span style="color:var(--teal)">else</span> {<br>&nbsp;&nbsp;enviarAoCliente();<br>}</div>
+    </div>
+    <div class="ag-grid" id="ag-grid"></div>
+  </div>
+</div>
+
+<!-- PLACAR FINAL — WALLPAPER IMG_0053 -->
+<div class="ws fi" style="padding:80px 5%">
+  <div class="ws-bg"><img src="img_placar.jpg" alt="Placar Final"></div>
+  <div class="ws-hex"></div><div class="ws-dots"></div><div class="ws-scan"></div>
+  <div style="max-width:900px;margin:0 auto">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;flex-wrap:wrap">
+      <span class="s-tag" style="margin-bottom:0">// Resultado técnico verificado</span>
+      <div style="background:rgba(184,255,87,0.1);border:1px solid rgba(184,255,87,0.25);padding:4px 14px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--volt);letter-spacing:2px">● PLACAR FINAL</div>
+    </div>
+    <h2 class="s-h" style="margin-bottom:24px;font-size:clamp(26px,4vw,50px)">CADA AGENTE. CADA NOTA.<br><span class="hl-t">TRANSPARÊNCIA TOTAL.</span></h2>
+    <div class="placar-wrap"><table class="placar-table"><thead><tr><th>#</th><th>Agente</th><th>Nota</th><th>Observação</th></tr></thead><tbody id="placar-tbody"></tbody></table>
+    <div class="placar-foot"><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted2)">MÉDIA GERAL DOS 9 AGENTES</div><div style="font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:900;color:var(--volt);text-shadow:0 0 20px rgba(184,255,87,0.5)">9.56 <span style="font-size:14px;color:var(--muted2)">/10</span></div></div></div>
+  </div>
+</div>
+
+<!-- PLANOS — WALLPAPER -->
+<div class="ws fi" id="planos" style="padding:110px 5%">
+  <div class="ws-bg"><img src="img_mobile.jpg" alt=""></div>
+  <div class="ws-hex"></div><div class="ws-dots"></div><div class="ws-scan"></div>
+  <span class="s-tag">// Investimento</span>
+  <h2 class="s-h">ESCOLHA SEU <span class="hl-t">PLANO</span></h2>
+  <p class="s-sub">R$80 por indicador + tipo de ordem. Preço calculado em tempo real.</p>
+  <div class="planos-grid" style="grid-template-columns:1fr;max-width:520px">
+    <div class="plano featured fi fd1" style="border-color:var(--teal)">
+      <div class="plano-name">Exatamente o que você pediu</div>
+      <div class="plano-price"><sup>R$</sup>300<sup>+</sup></div>
+      <div class="plano-base">+ R$80 por indicador nativo · + R$300 por indicador customizado</div>
+      <div class="plano-div"></div>
+      <div class="plano-feats">
+        <div class="plano-feat">Código MQL5 completo conforme sua estratégia</div>
+        <div class="plano-feat">Todos indicadores parametrizáveis — período, timeframe e mais</div>
+        <div class="plano-feat">Facilidade de BackTest com parâmetros ajustáveis no MT5</div>
+        <div class="plano-feat">Guia passo a passo de instalação do e-mail até operar</div>
+        <div class="plano-feat">6 proteções padrão MetaTEC embutidas</div>
+        <div class="plano-feat">Licença CPF / conta MT5 vitalícia</div>
+        <div class="plano-feat">Verificação por 9 agentes — Placar Final ≥ 9.7</div>
+        <div class="plano-feat">Entrega em 7 a 30 dias úteis</div>
+      </div>
+      <a href="builder.html" class="btn-plano" style="background:var(--teal);color:#000;border-color:var(--teal)">⚡ Montar meu Robô</a>
+    </div>
+  </div>
+</div>
+
+<!-- DEPOIMENTOS — WALLPAPER -->
+<div class="ws fi" id="depoimentos" style="padding:110px 5%">
+  <div class="ws-bg"><img src="img_app.jpg" alt=""></div>
+  <div class="ws-hex"></div><div class="ws-dots"></div><div class="ws-scan"></div>
+  <span class="s-tag">// Clientes MetaTEC</span>
+  <h2 class="s-h">QUEM JÁ OPERA<br><span class="hl-t">COM NOSSA</span> TECNOLOGIA</h2>
+  <p class="s-sub" style="margin-bottom:40px">Resultados reais de traders que receberam seus robôs.</p>
+  <div class="dep-grid">
+    <div class="dep-card fi fd1"><div class="dep-stars">★★★★★</div><div class="dep-text">Anti Delay via iTime() funcionou perfeitamente. 3 semanas de operação real sem duplicar ordens uma única vez.</div><div class="dep-author"><div class="dep-av">LF</div><div><div class="dep-name">Lucas F.</div><div class="dep-role">Scalping · MM + RSI · WIN$</div></div></div></div>
+    <div class="dep-card fi fd2"><div class="dep-stars">★★★★★</div><div class="dep-text">A licença por CPF me deu segurança total. Zero erros no MetaEditor. Tecnologia de verdade.</div><div class="dep-author"><div class="dep-av">AM</div><div><div class="dep-name">André M.</div><div class="dep-role">Day Trade · Bollinger+ADX · WIN$</div></div></div></div>
+    <div class="dep-card fi fd3"><div class="dep-stars">★★★★★</div><div class="dep-text">Em 10 dias recebi o robô funcionando com instruções claras. Agora opero sem ficar o dia todo na tela.</div><div class="dep-author"><div class="dep-av">MP</div><div><div class="dep-name">Marcelo P.</div><div class="dep-role">Reversão · RSI+MACD · Forex</div></div></div></div>
+    <div class="dep-card fi fd1"><div class="dep-stars">★★★★★</div><div class="dep-text">Gerenciamento de risco exatamente como pedi. Stop, take profit e trailing calibrados. Vale o investimento.</div><div class="dep-author"><div class="dep-av">RA</div><div><div class="dep-name">Rafael A.</div><div class="dep-role">Grid · Gestão Avançada · WIN$</div></div></div></div>
+    <div class="dep-card fi fd2"><div class="dep-stars">★★★★★</div><div class="dep-text">Meu EA com Ichimoku identifica tendências com precisão. Suporte excepcional durante todo o processo.</div><div class="dep-author"><div class="dep-av">JC</div><div><div class="dep-name">Juliano C.</div><div class="dep-role">Tendência · Ichimoku · Forex</div></div></div></div>
+    <div class="dep-card fi fd3"><div class="dep-stars">★★★★★</div><div class="dep-text">Executa sem delay, respeita todos os stops. A MetaTEC entrega o que promete. Recomendo demais.</div><div class="dep-author"><div class="dep-av">EL</div><div><div class="dep-name">Eduardo L.</div><div class="dep-role">Scalping · Índice WIN$ · M5</div></div></div></div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<section class="fi" id="faq" style="background:var(--deep);padding:110px 5%">
+  <span class="s-tag">// Dúvidas</span>
+  <h2 class="s-h">PERGUNTAS <span class="hl-t">DIRETAS.</span><br>RESPOSTAS DIRETAS.</h2>
+  <div class="faq-col" id="faq-col"></div>
+</section>
+
+<!-- CTA FINAL -->
+<div class="cta-section fi" id="orcamento">
+  <div class="cta-bg"><img src="img_dashboard.png" alt=""></div>
+  <div class="ws-hex" style="position:absolute;inset:0;z-index:1;opacity:.04"></div>
+  <span class="s-tag">// O futuro chegou</span>
+  <h2 class="s-h">SOMOS A <span class="hl-t">MetaTEC</span>.<br>SEU ROBÔ ESTÁ<br><span class="hl-v">PRONTO PARA OPERAR.</span></h2>
+  <p class="cta-p">Simule seu orçamento — menos de 2 minutos, preço em tempo real, entregue com a tecnologia mais avançada disponível hoje.</p>
+  <div class="cta-btns">
+    <a href="#" class="btn-main" onclick="alert('Integre mt5_builder.html aqui')">⚡ Simular Orçamento</a>
+    <a href="https://wa.me/5527999464537" class="btn-ghost" target="_blank">💬 WhatsApp</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div><div class="footer-logo-txt">Meta<em>TEC</em></div><div class="footer-tagline">Tecnologia de última geração para automação no MetaTrader 5.</div></div>
+    <div><div class="fc-title">Navegação</div><div class="footer-links"><a href="#como-funciona">Processo</a><a href="#seguranca">Segurança</a><a href="#painel">Painel</a><a href="#agentes">9 Agentes</a><a href="#planos">Planos</a></div></div>
+    <div><div class="fc-title">Mercados</div><div class="footer-links"><a href="#">B3 — WIN$/WDO$</a><a href="#">Forex</a><a href="#">Cripto</a></div></div>
+    <div><div class="fc-title">Contato</div><div class="footer-links"><a href="#">WhatsApp</a><a href="#">E-mail</a></div></div>
+  </div>
+  <div class="footer-bottom"><div class="footer-copy">© 2025 MetaTEC · Todos os direitos reservados</div><div class="fb-badge"><div class="fb-dot"></div>Sistemas operacionais · 27/27 checks ativos</div></div>
+</footer>
+
+<a class="wa" href="builder.html" title="Montar meu Robô">🤖</a>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   CANVAS STARK — PARTÍCULAS + NÓS + RADAR + LASER
+═══════════════════════════════════════════════════ */
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d')
+let W,H,MX=innerWidth/2,MY=innerHeight/2,CLICKED=false
+function rsz(){W=cv.width=innerWidth;H=cv.height=innerHeight}
+rsz();window.addEventListener('resize',rsz)
+
+/* ── Partículas orbitais ── */
+class Particle {
+  constructor(){ this.reset(true) }
+  reset(init){
+    this.x = init ? Math.random()*W : (Math.random()<.5 ? 0 : W)
+    this.y = init ? Math.random()*H : Math.random()*H
+    this.sz = Math.random()*1.8+0.4
+    this.vx = (Math.random()-.5)*.6
+    this.vy = (Math.random()-.5)*.6
+    this.life = Math.random()*180+80
+    this.maxLife = this.life
+    this.pulse = Math.random()*Math.PI*2
+    const r=Math.random()
+    this.rgb = r>.65 ? '0,200,180' : r>.3 ? '184,255,87' : '0,245,224'
+  }
+  tick(){
+    this.pulse += .02
+    this.life--
+    this.x += this.vx; this.y += this.vy
+    // atração ao mouse — mais forte quanto mais perto
+    const dx=MX-this.x, dy=MY-this.y, d=Math.sqrt(dx*dx+dy*dy)
+    if(d<240){ this.vx+=dx*.00025; this.vy+=dy*.00025 }
+    this.vx *= .987; this.vy *= .987
+    if(this.life<=0 || this.x<-20||this.x>W+20||this.y<-20||this.y>H+20) this.reset(false)
+  }
+  draw(){
+    const prog = this.life/this.maxLife
+    const a = prog * this.sz/2 * (.6+.4*Math.sin(this.pulse))
+    ctx.beginPath(); ctx.arc(this.x,this.y,this.sz,0,Math.PI*2)
+    ctx.fillStyle=`rgba(${this.rgb},${Math.min(a,.55)})`;ctx.fill()
+  }
+}
+
+/* ── Nós luminosos (estrelas grandes interativas) ── */
+class Node {
+  constructor(){
+    this.x=Math.random()*W; this.y=Math.random()*H
+    this.vx=(Math.random()-.5)*.35; this.vy=(Math.random()-.5)*.35
+    this.sz=Math.random()*2.5+1
+    this.pulse=Math.random()*Math.PI*2
+    this.hue=Math.random()>.5?'0,200,180':'0,245,224'
+  }
+  tick(){
+    this.pulse+=.025; this.x+=this.vx; this.y+=this.vy
+    if(this.x<0||this.x>W) this.vx*=-1
+    if(this.y<0||this.y>H) this.vy*=-1
+    // repulsão suave do mouse quando muito perto
+    const dx=this.x-MX, dy=this.y-MY, d=Math.sqrt(dx*dx+dy*dy)
+    if(d<80){ this.vx+=dx*.002; this.vy+=dy*.002 }
+  }
+  draw(){
+    const pl=.5+.5*Math.sin(this.pulse)
+    const r=this.sz*(5+4*pl)
+    // halo externo
+    const g=ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,r)
+    g.addColorStop(0,`rgba(${this.hue},${.7*pl})`)
+    g.addColorStop(.5,`rgba(${this.hue},${.2*pl})`)
+    g.addColorStop(1,'rgba(0,200,180,0)')
+    ctx.beginPath(); ctx.arc(this.x,this.y,r,0,Math.PI*2)
+    ctx.fillStyle=g; ctx.fill()
+    // núcleo
+    ctx.beginPath(); ctx.arc(this.x,this.y,this.sz,0,Math.PI*2)
+    ctx.fillStyle=`rgba(${this.hue===.hue?'0,245,224':this.hue},${.9*pl})`; ctx.fill()
+    // spike cruzado
+    ctx.save(); ctx.globalAlpha=.25*pl; ctx.strokeStyle=`rgba(${this.hue},.6)`; ctx.lineWidth=.5
+    ctx.beginPath(); ctx.moveTo(this.x-r,this.y); ctx.lineTo(this.x+r,this.y); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(this.x,this.y-r); ctx.lineTo(this.x,this.y+r); ctx.stroke()
+    ctx.restore()
+  }
+  drawConnections(nodes){
+    const dx=MX-this.x, dy=MY-this.y, dm=Math.sqrt(dx*dx+dy*dy)
+    // linha ao mouse
+    if(dm<380){
+      const a=(1-dm/380)*.8
+      ctx.beginPath(); ctx.moveTo(this.x,this.y); ctx.lineTo(MX,MY)
+      ctx.strokeStyle=`rgba(0,245,224,${a})`; ctx.lineWidth=dm<120?.9:.5; ctx.stroke()
+    }
+    // linhas entre nós próximos
+    nodes.forEach(n2=>{
+      if(n2===this) return
+      const d2=Math.sqrt((this.x-n2.x)**2+(this.y-n2.y)**2)
+      if(d2<180){
+        const a=(1-d2/180)*.18
+        ctx.beginPath(); ctx.moveTo(this.x,this.y); ctx.lineTo(n2.x,n2.y)
+        ctx.strokeStyle=`rgba(0,200,180,${a})`; ctx.lineWidth=.4; ctx.stroke()
+      }
+    })
+  }
+}
+
+/* ── Ondas de radar ao clicar ── */
+const ripples=[]
+function spawnRipple(x,y){
+  ripples.push({x,y,r:0,max:200,a:.8})
+}
+
+/* Criar entidades */
+const particles = Array.from({length:180},()=>new Particle())
+const nodes     = Array.from({length:28}, ()=>new Node())
+
+let frameN=0
+function frame(){
+  frameN++
+  ctx.clearRect(0,0,W,H)
+
+  /* conexões entre partículas próximas */
+  for(let i=0;i<particles.length;i++){
+    for(let j=i+1;j<particles.length;j++){
+      const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y
+      const d=Math.sqrt(dx*dx+dy*dy)
+      if(d<100){
+        ctx.beginPath()
+        ctx.moveTo(particles[i].x,particles[i].y)
+        ctx.lineTo(particles[j].x,particles[j].y)
+        ctx.strokeStyle=`rgba(0,200,180,${(1-d/100)*.1})`
+        ctx.lineWidth=.35; ctx.stroke()
+      }
+    }
+  }
+
+  /* nós — conexões primeiro, depois brilho */
+  nodes.forEach(n=>{ n.tick(); n.drawConnections(nodes) })
+  nodes.forEach(n=>n.draw())
+
+  /* partículas */
+  particles.forEach(p=>{ p.tick(); p.draw() })
+
+  /* GLOW DO MOUSE — grande halo radial no canvas */
+  const gm=ctx.createRadialGradient(MX,MY,0,MX,MY,340)
+  gm.addColorStop(0,'rgba(0,200,180,0.10)')
+  gm.addColorStop(.35,'rgba(0,200,180,0.04)')
+  gm.addColorStop(1,'rgba(0,200,180,0)')
+  ctx.beginPath(); ctx.arc(MX,MY,340,0,Math.PI*2); ctx.fillStyle=gm; ctx.fill()
+
+  /* ponto central do mouse — brilho extra */
+  const gc=ctx.createRadialGradient(MX,MY,0,MX,MY,60)
+  gc.addColorStop(0,'rgba(0,245,224,0.22)')
+  gc.addColorStop(1,'rgba(0,245,224,0)')
+  ctx.beginPath(); ctx.arc(MX,MY,60,0,Math.PI*2); ctx.fillStyle=gc; ctx.fill()
+
+  /* ripples de clique */
+  for(let i=ripples.length-1;i>=0;i--){
+    const rp=ripples[i]
+    rp.r+=6; rp.a-=.022
+    ctx.beginPath(); ctx.arc(rp.x,rp.y,rp.r,0,Math.PI*2)
+    ctx.strokeStyle=`rgba(0,245,224,${rp.a})`; ctx.lineWidth=1.5; ctx.stroke()
+    // segunda onda
+    ctx.beginPath(); ctx.arc(rp.x,rp.y,rp.r*.6,0,Math.PI*2)
+    ctx.strokeStyle=`rgba(184,255,87,${rp.a*.6})`; ctx.lineWidth=.8; ctx.stroke()
+    if(rp.a<=0||rp.r>rp.max) ripples.splice(i,1)
+  }
+
+  requestAnimationFrame(frame)
+}
+frame()
+
+/* ═══════════════════════════════════════════════════
+   CURSOR LASER AZUL-CIANO
+═══════════════════════════════════════════════════ */
+const cDot=document.getElementById('c-dot')
+const cRing=document.getElementById('c-ring')
+let cx=0,cy=0,rx=0,ry=0,trailCount=0
+
+document.addEventListener('mousemove',e=>{
+  cx=e.clientX; cy=e.clientY; MX=cx; MY=cy
+  // rastros densos — frequência controlada por throttle
+  trailCount++
+  if(trailCount%2===0){
+    for(let i=0;i<4;i++){
+      const t=document.createElement('div')
+      t.className='c-trail'
+      const s=Math.random()*5+1.5
+      const angle=Math.random()*Math.PI*2
+      const dist=Math.random()*4
+      t.style.cssText=`
+        left:${cx+Math.cos(angle)*dist}px;
+        top:${cy+Math.sin(angle)*dist}px;
+        width:${s}px;height:${s}px;
+        background:rgba(0,${200+Math.random()*55|0},${180+Math.random()*75|0},${(.25+Math.random()*.4).toFixed(2)});
+        box-shadow:0 0 ${s*2}px rgba(0,200,180,.4);
+      `
+      document.body.appendChild(t)
+      setTimeout(()=>t.remove(),600)
+    }
+  }
+})
+
+/* clique: burst radial */
+document.addEventListener('click',e=>{
+  spawnRipple(e.clientX,e.clientY)
+  const b=document.createElement('div')
+  b.className='c-burst'
+  b.style.cssText=`left:${e.clientX}px;top:${e.clientY}px;width:40px;height:40px;`
+  document.body.appendChild(b)
+  setTimeout(()=>b.remove(),600)
+})
+
+/* animação suave do cursor — lag proposital para efeito fluido */
+;(function animCursor(){
+  rx += (cx-rx) * .12
+  ry += (cy-ry) * .12
+  cDot.style.transform = `translate(calc(${cx}px - 50%), calc(${cy}px - 50%))`
+  cDot.style.left = '0'
+  cDot.style.top  = '0'
+  cRing.style.transform = `translate(calc(${rx}px - 50%), calc(${ry}px - 50%))`
+  cRing.style.left = '0'
+  cRing.style.top  = '0'
+  requestAnimationFrame(animCursor)
+})()
+
+/* hover nos elementos interativos */
+const hoverEls=document.querySelectorAll('a,button,.hcard,.pstep,.seg-card,.dep-card,.plano,.ag-row,.pm-mock,.btn-main,.btn-ghost,.btn-plano')
+hoverEls.forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    cRing.classList.add('hover')
+    cDot.classList.add('volt')
+  })
+  el.addEventListener('mouseleave',()=>{
+    cRing.classList.remove('hover')
+    cDot.classList.remove('volt')
+  })
+})
+
+/* ── TILT 3D nos cards ao mover o mouse ── */
+document.querySelectorAll('.hcard,.pstep,.seg-card,.dep-card,.plano').forEach(card=>{
+  card.addEventListener('mousemove',e=>{
+    const r=card.getBoundingClientRect()
+    const x=e.clientX-r.left, y=e.clientY-r.top
+    const cx2=r.width/2, cy2=r.height/2
+    const rotX=((y-cy2)/cy2)*-8
+    const rotY=((x-cx2)/cx2)*8
+    card.style.transform=`perspective(600px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateY(-4px)`
+    card.style.boxShadow=`0 20px 60px rgba(0,0,0,.5), 0 0 30px rgba(0,200,180,.25), ${-rotY}px ${rotX}px 20px rgba(0,200,180,.1)`
+    // reflexo de luz no card
+    card.style.backgroundImage=`radial-gradient(circle at ${x}px ${y}px, rgba(0,200,180,.08) 0%, transparent 60%)`
+  })
+  card.addEventListener('mouseleave',()=>{
+    card.style.transform=''
+    card.style.boxShadow=''
+    card.style.backgroundImage=''
+  })
+})
+
+/* ── EFEITO MAGNÉTICO em botões ── */
+document.querySelectorAll('.btn-main,.btn-ghost,.nav-cta').forEach(btn=>{
+  btn.addEventListener('mousemove',e=>{
+    const r=btn.getBoundingClientRect()
+    const dx=(e.clientX-r.left-r.width/2)*.22
+    const dy=(e.clientY-r.top-r.height/2)*.22
+    btn.style.transform=`translate(${dx}px,${dy}px)`
+  })
+  btn.addEventListener('mouseleave',()=>{ btn.style.transform='' })
+})
+
+/* NAV scroll */
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',scrollY>30)
+})
+
+/* PARALLAX HERO wallpaper */
+const hwi=document.getElementById('hero-wp-img')
+window.addEventListener('scroll',()=>{ if(hwi) hwi.style.transform=`scale(1.08) translateY(${scrollY*.14}px)` })
+
+/* FADE IN on scroll */
+const io=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')}),{threshold:.06})
+document.querySelectorAll('.fi').forEach(el=>io.observe(el))
+
+/* TICKER */
+const TICKS=[{n:'WINFUT',v:'134.280',u:true},{n:'WDOFUT',v:'5.847',u:true},{n:'BTCUSDT',v:'94.320',u:true},{n:'EURUSD',v:'1.0842',u:false},{n:'ETHUSD',v:'3.218',u:true},{n:'PETRK34',v:'38.90',u:true},{n:'ITUB4',v:'33.44',u:false},{n:'MGLU3',v:'2.88',u:true},{n:'VALE3',v:'58.42',u:false}]
+const tt=document.getElementById('tt')
+if(tt){const h=TICKS.map(t=>`<div class="ti"><span class="ti-n">${t.n}</span><span class="${t.u?'ti-u':'ti-d'}">${t.v}</span><span style="font-size:9px;color:${t.u?'var(--volt)':'var(--red)'}">${t.u?'▲':'▼'}</span></div>`).join('');tt.innerHTML=h+h}
+
+/* 9 AGENTES */
+const AGENTES=[
+  {icon:'⚡',nome:'Anti-Delay',    desc:'2 camadas: iTime() por barra + g_orderPending por tick',nota:10.0,pct:100,ok:true},
+  {icon:'💹',nome:'Spread',        desc:'Filtro de spread configurável — bloqueia em picos',      nota:10.0,pct:100,ok:true},
+  {icon:'💰',nome:'Capital',       desc:'Fórmula de lotagem + SL/TP dinâmico e margem',           nota:9.0, pct:90, ok:false,obs:'Fórmula revisada'},
+  {icon:'📊',nome:'Indicadores',   desc:'DI+/DI- e handles verificados e inicializados',          nota:9.0, pct:90, ok:false,obs:'DI+/DI- revisados'},
+  {icon:'🕐',nome:'Horário',       desc:'Conversão de fuso horário local → servidor MT5',          nota:10.0,pct:100,ok:true},
+  {icon:'🔗',nome:'Consistência',  desc:'statusTxt sincronizado com estado da posição',            nota:9.0, pct:90, ok:false,obs:'statusTxt corrigido'},
+  {icon:'📈',nome:'Risco/Retorno', desc:'Relação R:R, drawdown máximo e meta diária',              nota:10.0,pct:100,ok:true},
+  {icon:'📡',nome:'Conexão',       desc:'TERMINAL_CONNECTED + reconexão automática',               nota:10.0,pct:100,ok:true},
+  {icon:'⚙️',nome:'FluxoExecucao',desc:'Ordem→confirmação→gestão→encerramento validado',          nota:9.0, pct:90, ok:false,obs:'Teste 4 refinado'},
+]
+const agGrid=document.getElementById('ag-grid'),pb=document.getElementById('placar-tbody')
+AGENTES.forEach((ag,i)=>{
+  const sc=ag.ok?'rgba(184,255,87,0.1)':'rgba(255,184,48,0.1)',bc=ag.ok?'rgba(184,255,87,0.28)':'rgba(255,184,48,0.28)',vc=ag.ok?'var(--volt)':'var(--amber)'
+  const d=document.createElement('div');d.className='ag-row fi';d.style.transitionDelay=(i*.055)+'s'
+  d.innerHTML=`<div class="ag-ico" style="background:${sc};border-color:${bc};color:${vc}">${ag.icon}</div><div style="flex:1"><div class="ag-name">${ag.nome}</div><div class="ag-desc">${ag.desc}</div>${ag.obs?`<div class="ag-obs">⚠ ${ag.obs}</div>`:''}</div><div class="ag-score" style="color:${vc}">${ag.nota.toFixed(1)}</div><div class="ag-bar" style="width:0%;background:${ag.ok?'linear-gradient(90deg,var(--teal),var(--volt))':'linear-gradient(90deg,var(--amber),var(--volt))'}" data-w="${ag.pct}%"></div>`
+  agGrid.appendChild(d);io.observe(d)
+  if(pb){const tr=document.createElement('tr');tr.innerHTML=`<td class="pt-n">${i+1}</td><td class="pt-nome">${ag.nome}</td><td class="${ag.ok?'pt-ok':'pt-warn'}">${ag.nota.toFixed(1)}</td><td style="font-size:11px;color:var(--muted2)">${ag.ok?'✅':'⚠️'} ${ag.obs||'Aprovado'}</td>`;pb.appendChild(tr)}
+})
+const nm=document.createElement('div');nm.className='nota-media fi';nm.innerHTML=`<div class="nm-lbl">// PLACAR FINAL — Nota média dos 9 agentes</div><div class="nm-val">9.56</div>`;agGrid.appendChild(nm);io.observe(nm)
+
+new IntersectionObserver(entries=>{if(entries[0].isIntersecting)setTimeout(()=>document.querySelectorAll('.ag-bar').forEach(b=>b.style.width=b.dataset.w),280)},{threshold:.2}).observe(document.getElementById('agentes'))
+
+/* PAINEL */
+const mc=document.getElementById('mchart')
+if(mc){[42,58,36,72,50,65,44,80,55,68,40,76,52,70,44,83,58,66,48,79,38,86,60,73,46,90,54,77,50,82].forEach(h=>{const b=document.createElement('div');b.className='mc-b '+(Math.random()>.37?'mc-up':'mc-dn');b.style.height=h+'%';mc.appendChild(b)})}
+function toggleRobo(cb){const l=document.getElementById('slbl'),t=document.getElementById('tgltxt');if(cb.checked){l.textContent='● ROBÔ ATIVO';l.className='pm-slbl on';t.textContent='ON';addLog('info',`[${hora()}] Robô reativado`)}else{l.textContent='○ ROBÔ SUSPENSO';l.className='pm-slbl off';t.textContent='OFF';addLog('warn',`[${hora()}] Robô suspenso`)}}
+function zerarPosicoes(){const btn=document.getElementById('btn-zerar');btn.style.transform='scale(0.95)';setTimeout(()=>btn.style.transform='',200);addLog('warn',`[${hora()}] ⚡ ZERANDO — CloseAll()`);setTimeout(()=>{document.getElementById('opsval').textContent='0';document.getElementById('opsval').className='pmm-val r';addLog('ok',`[${hora()}] ✓ Posições fechadas`)},750)}
+function addLog(t,m){const l=document.getElementById('plog');if(!l)return;const d=document.createElement('div');d.className=`ll l${t}`;d.textContent=m;l.appendChild(d);l.scrollTop=l.scrollHeight;if(l.children.length>8)l.removeChild(l.firstChild)}
+function hora(){return new Date().toTimeString().slice(0,8)}
+setInterval(()=>{const s=document.getElementById('sprdval');if(s)s.textContent=(0.6+Math.random()*1.4).toFixed(1)},2500)
+
+/* FAQ */
+const FAQS=[
+  {q:'Quanto tempo leva para receber meu robô?',a:'De 7 a 30 dias úteis. Robôs simples em até 7 dias. Com otimização e backtest completo, até 30 dias.'},
+  {q:'Como funciona a licença por CPF?',a:'O código verifica CPF ou conta MT5 no OnInit() e bloqueia imediatamente se não autorizado — proteção anti-pirataria total.'},
+  {q:'O que é o Anti-Delay e por que é importante?',a:'Usa iTime() para executar a lógica apenas uma vez por candle fechado. Sem isso, o robô pode disparar múltiplas ordens no mesmo tick causando erros graves.'},
+  {q:'O robô funciona em qualquer corretora MT5?',a:'Sim. Gerado com detecção automático de filling mode (FOK, IOC, Return) — compatível com todas as corretoras MT5.'},
+  {q:'Posso solicitar ajustes após a entrega?',a:'Sim. Entre em contato via WhatsApp para verificar os termos do seu plano.'},
+  {q:'Quantos indicadores posso combinar?',a:'Sem limite. Cada indicador custa R$80. RSI, MACD, Médias, Bollinger, ADX, VWAP, Ichimoku e muito mais.'},
+  {q:'O que acontece se o Placar Final reprovar?',a:'O sistema reprocessa automaticamente até atingir nota média 9.7. Nenhum .mq5 é enviado sem aprovação completa nos 9 agentes.'},
+]
+const fc=document.getElementById('faq-col')
+FAQS.forEach(item=>{const d=document.createElement('div');d.className='faq-item fi';d.innerHTML=`<div class="faq-q" onclick="this.parentElement.classList.toggle('open')">${item.q}<div class="faq-toggle">+</div></div><div class="faq-a">${item.a}</div>`;fc.appendChild(d);io.observe(d)})
+</script>
+</body>
+</html>
