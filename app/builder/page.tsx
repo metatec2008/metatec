@@ -658,7 +658,35 @@ export default function Builder() {
                 <span style={{ fontSize: 10, color: C.muted2, fontFamily: "'JetBrains Mono', monospace", letterSpacing: .5 }}>AMBIENTE 100% SEGURO · SSL · DADOS CRIPTOGRAFADOS</span>
               </div>
 
-              <button style={{ ...btnPrimary, width: '100%', justifyContent: 'center', fontSize: 14, padding: 17 }} onClick={() => { showToast('✅ Processando...'); setTimeout(() => setStep(6), 1500) }}>
+              <button style={{ ...btnPrimary, width: '100%', justifyContent: 'center', fontSize: 14, padding: 17 }} onClick={async () => {
+                showToast('✅ Criando seu pedido...')
+                try {
+                  const res = await fetch('https://metatec-server-production-c1f1.up.railway.app/criar-pagamento', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      protocolo,
+                      cliente: { nome, cpf, email, fone, contaMt5 },
+                      robo: { nome: roboNome, nivel: roboLevel.label },
+                      estrategia: { mercado, timeframe, orderType, sl, tp, horario, descricao: strategyText },
+                      indicadores: Array.from(selected.values()).map(i => ({ id: i.id, name: i.name, native: i.native, valor: i.native ? 80 : 300 })),
+                      total: calcTotal(),
+                      payMethod,
+                    })
+                  })
+                  const data = await res.json()
+                  if (data.ok && data.init_point) {
+                    showToast('🚀 Redirecionando para o pagamento...')
+                    setTimeout(() => { window.location.href = data.init_point }, 1200)
+                  } else {
+                    showToast('⚠ Erro: ' + (data.erro || 'Tente novamente'))
+                    setTimeout(() => setStep(6), 1500)
+                  }
+                } catch {
+                  showToast('⚠ Erro de conexão. Use o WhatsApp.')
+                  setTimeout(() => setStep(6), 1500)
+                }
+              }}>
                 ⚡ ATIVAR MEU ROBÔ AGORA
               </button>
               <button style={{ background: 'none', border: 'none', color: C.muted2, fontSize: 12, cursor: 'pointer', textDecoration: 'underline', fontFamily: "'Space Grotesk', sans-serif" }} onClick={() => setStep(4)}>← Voltar e revisar</button>
